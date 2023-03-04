@@ -13,12 +13,8 @@ int main(int argc, char **argv) {
         return 0;
     }
 
-    PtShConfig *config = readConfig();
-
     if (args->sourcePath == NULL || args->destPath == NULL) {
-        printMessage(config, "You must specify source and destination path",
-                     true);
-        closeConfig(config);
+        printMessage("You must specify source and destination path", true);
         return 1;
     }
 
@@ -29,15 +25,14 @@ int main(int argc, char **argv) {
     newt.c_lflag &= ~(ICANON | ECHO);
     tcsetattr(STDIN_FILENO, TCSANOW, &newt);
 
-    MoveData *mData = getMoveData(args, config);
+    MoveData *mData = getMoveData(args);
     if (mData == NULL) {
         tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-        closeConfig(config);
         return 1;
     }
 
     if (args->interactive)
-        selectFiles(config, mData);
+        selectFiles(mData);
 
     char buff[25];
     printSize(buff, 25, mData->totalBytes, args->decimalSize);
@@ -45,11 +40,10 @@ int main(int argc, char **argv) {
     printf("Copying %d files (%s)", mData->fileCount - mData->ignoredCount,
            buff);
 
-    copyFiles(config, args, mData);
+    copyFiles(args, mData);
 
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 
-    closeConfig(config);
     freeMoveData(mData);
     freeArgs(args);
 

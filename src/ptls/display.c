@@ -30,8 +30,7 @@ void displayHelp() {
     printHelpLine(NO_DIRS_TOP_ARG, NO_DIRS_TOP_ARG_W, NO_DIRS_TOP_ARG_DESC);
 }
 
-void displayBlock(Fields **fields, int count, ColumnSizes *cSize, Args *args,
-                  PtShConfig *config) {
+void displayBlock(Fields **fields, int count, ColumnSizes *cSize, Args *args) {
     int longestName = cSize->name;
     int actualChar = 0;
     int actualColumn = 0;
@@ -43,7 +42,7 @@ void displayBlock(Fields **fields, int count, ColumnSizes *cSize, Args *args,
 
     int columns = w.ws_col / (longestName + 1);
 
-    for (int i = 0; i < count; i++) {
+    for (unsigned i = 0; i < count; i++) {
         printf("%s", fields[i]->name);
         actualChar += fields[i]->nameLength;
         int spaces = longestName + 1 - (actualChar % (longestName + 1));
@@ -70,8 +69,7 @@ void printField(char *str, int length, int columnSize) {
         printf(" ");
 }
 
-void displayList(Fields **fields, int count, ColumnSizes *cSize, Args *args,
-                 PtShConfig *config) {
+void displayList(Fields **fields, int count, ColumnSizes *cSize, Args *args) {
     for (int i = 0; i < count; i++) {
         printField(fields[i]->name, fields[i]->nameLength, cSize->name);
 
@@ -99,10 +97,9 @@ void displayList(Fields **fields, int count, ColumnSizes *cSize, Args *args,
     }
 }
 
-void display(Fields **fields, int count, Args *args, PtShConfig *config,
-             ColumnSizes *cSize) {
+void display(Fields **fields, int count, Args *args, ColumnSizes *cSize) {
     if (args->l)
-        displayList(fields, count, cSize, args, config);
+        displayList(fields, count, cSize, args);
     else
-        displayBlock(fields, count, cSize, args, config);
+        displayBlock(fields, count, cSize, args);
 }

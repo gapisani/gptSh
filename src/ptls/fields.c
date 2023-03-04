@@ -5,6 +5,8 @@
 #include <time.h>
 
 #include "ptls.h"
+#include "../config.h"
+#include "fileconfig.h"
 
 int getIntDigits(int i) {
     if (i == 0)
@@ -33,7 +35,7 @@ void setHardlinks(Fields *fields, File *file, Args *args, ColumnSizes *cSize) {
     int digits = getIntDigits(file->stats->st_nlink);
 
     fields->hardlinks = calloc(digits + 1, sizeof(char));
-    sprintf(fields->hardlinks, "%d", file->stats->st_nlink);
+    sprintf(fields->hardlinks, "%ld", file->stats->st_nlink);
     if (digits > cSize->hardlinks)
         cSize->hardlinks = digits;
 }
@@ -42,7 +44,7 @@ void setInode(Fields *fields, File *file, Args *args, ColumnSizes *cSize) {
     int digits = getIntDigits(file->stats->st_ino);
 
     fields->inode = calloc(digits + 1, sizeof(char));
-    sprintf(fields->inode, "%d", file->stats->st_ino);
+    sprintf(fields->inode, "%ld", file->stats->st_ino);
     if (digits > cSize->inode)
         cSize->inode = digits;
 }
@@ -86,7 +88,6 @@ void setPermissions(Fields *fields, File *file, Args *args) {
     permStr[8 - noGroupDecrease] = (mode & S_IROTH) ? 'r' : '-';
     permStr[9 - noGroupDecrease] = (mode & S_IWOTH) ? 'w' : '-';
     permStr[10 - noGroupDecrease] = (mode & S_IXOTH) ? 'x' : '-';
-
     fields->permissions = permStr;
 }
 
@@ -126,8 +127,7 @@ void setUidGid(Fields *fields, File *file, Args *args, ColumnSizes *cSize) {
     }
 }
 
-void fillFields(Fields *fields, File *file, PtShConfig *config, Args *args,
-                ColumnSizes *cSize) {
+void fillFields(Fields *fields, File *file, Args *args, ColumnSizes *cSize) {
     FileType fType = FT_File;
 
     if (S_ISDIR(file->stats->st_mode))
@@ -135,15 +135,14 @@ void fillFields(Fields *fields, File *file, PtShConfig *config, Args *args,
     else if (S_ISLNK(file->stats->st_mode))
         fType = FT_Link;
 
-    FileConfigValues *fcv = getFileConfigValues(config, fType);
-
+    FileConfigValues *fcv = getFileConfigValues(fType);
     int nameLength = strlen(fcv->prefix) + strlen(file->name);
     fields->nameLength = nameLength;
     if (nameLength > cSize->name)
         cSize->name = nameLength;
 
     nameLength += strlen(fcv->prefixEscapeCodes) +
-                  strlen(fcv->nameEscapeCodes) + strlen("\x1b[0m") * 2;
+              strlen(fcv->nameEscapeCodes) + strlen("\x1b[0m") * 2;
 
     fields->name = calloc(nameLength + 1, sizeof(char));
     strcpy(fields->name, fcv->prefixEscapeCodes);

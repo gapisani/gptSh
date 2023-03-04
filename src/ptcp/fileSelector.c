@@ -6,9 +6,9 @@
 #include <sys/stat.h>
 
 #include "ptcp.h"
+#include "../config.h"
 
-void displayFile(PtShConfig *config, FilePaths *fPaths, unsigned int cols,
-                 bool selected) {
+void displayFile(FilePaths *fPaths, unsigned int cols, bool selected) {
     char *selectedPrefix = "";
     if (selected)
         selectedPrefix = "\x1b[7m";
@@ -17,26 +17,21 @@ void displayFile(PtShConfig *config, FilePaths *fPaths, unsigned int cols,
     char path[PATH_MAX + 1];
     realpath(fPaths->sourcePath, path);
 
-    FileType type = FT_File;
-    if (S_ISLNK(stats.st_mode))
-        type = FT_Link;
-
-    FileConfigValues *fcv = getFileConfigValues(config, type);
     printf("%c[2K", 27);
-    printf("%s%s%s\x1b[0m%s%s", selectedPrefix, fcv->prefixEscapeCodes,
-           fcv->prefix, selectedPrefix, fcv->nameEscapeCodes);
+    printf("%s%s%s\x1b[0m%s%s", selectedPrefix, DIR_PREFIX_ESCAPE_CODES,
+           DIR_PREFIX, selectedPrefix, DIR_NAME_ESCAPE_CODES);
 
-    unsigned int actualChar = strlen(fcv->prefix) + strlen(fPaths->sourcePath);
+    unsigned int actualChar = strlen(DIR_PREFIX) + strlen(fPaths->sourcePath);
 
-    char *fileStatus = getValueStr(config->successPrefix);
-    char *fileStatusEC = getValueStr(config->successPrefixEscapeCodes);
+    char *fileStatus = SUCCESS_PREFIX;
+    char *fileStatusEC = SUCCESS_PREFIX_ESCAPE_CODES;
     if (fPaths->ignore) {
-        fileStatus = getValueStr(config->errorPrefix);
-        fileStatusEC = getValueStr(config->errorPrefixEscapeCodes);
+        fileStatus = ERROR_PREFIX;
+        fileStatusEC = ERROR_PREFIX_ESCAPE_CODES;
     }
 
     unsigned int lineChars =
-        strlen(fcv->prefix) + strlen(fPaths->sourcePath) + strlen(fileStatus);
+        strlen(DIR_PREFIX) + strlen(fPaths->sourcePath) + strlen(fileStatus);
 
     if (lineChars > cols) {
         unsigned int length =
@@ -62,10 +57,9 @@ void displayFile(PtShConfig *config, FilePaths *fPaths, unsigned int cols,
     printf("\x1b[0m\n");
 
     fflush(stdout);
-
-    free(fcv);
 }
-void displaySelector(PtShConfig *config, unsigned int page,
+
+void displaySelector(unsigned int page,
                      unsigned int lastPage, unsigned int pageFileCount,
                      unsigned int cols, unsigned int selectedFile,
                      MoveData *mData) {
@@ -81,7 +75,7 @@ void displaySelector(PtShConfig *config, unsigned int page,
         if (i + firstFile >= mData->fileCount)
             printf("\n");
         else
-            displayFile(config, mData->files[i + firstFile], cols,
+            displayFile(mData->files[i + firstFile], cols,
                         i == selectedFile);
     }
 }
@@ -92,7 +86,7 @@ void nextPage(unsigned int *actualPage, unsigned int *lastPage) {
         (*actualPage) = (*lastPage);
 }
 
-void selectFiles(PtShConfig *config, MoveData *mData) {
+void selectFiles(MoveData *mData) {
     struct winsize w;
     ioctl(0, TIOCGWINSZ, &w);
 
@@ -111,7 +105,7 @@ void selectFiles(PtShConfig *config, MoveData *mData) {
             continue;
         }
 
-        displaySelector(config, page, lastPage, pageFileCount, w.ws_col,
+        displaySelector(page, lastPage, pageFileCount, w.ws_col,
                         selectedFile, mData);
         c = getchar();
 

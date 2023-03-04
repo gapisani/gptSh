@@ -4,6 +4,8 @@
 #include <string.h>
 #include <sys/ioctl.h>
 
+#include "../config.h"
+
 void createSubdirs(Args *args, MoveData *mData) {
     for (int i = 0; i < mData->subdirCount; i++) {
         char *path =
@@ -19,7 +21,7 @@ void createSubdirs(Args *args, MoveData *mData) {
     }
 }
 
-void copyFile(const PtShConfig *config, FilePaths *paths, int progressBarSize,
+void copyFile(FilePaths *paths, int progressBarSize,
               unsigned long *actualByte, unsigned long *totalBytes) {
 
     struct stat stats;
@@ -40,7 +42,7 @@ void copyFile(const PtShConfig *config, FilePaths *paths, int progressBarSize,
             fwrite(buff, sizeof(unsigned char), readCount, dest);
 
             (*actualByte) += readCount * sizeof(unsigned char);
-            setProgressBar(config, progressBarSize,
+            setProgressBar(progressBarSize,
                            (100 * (*actualByte)) / (*totalBytes));
 
         } while (readCount == buffSize);
@@ -52,9 +54,9 @@ void copyFile(const PtShConfig *config, FilePaths *paths, int progressBarSize,
     chmod(paths->destPath, stats.st_mode);
 }
 
-void copyFiles(const PtShConfig *config, Args *args, MoveData *mData) {
+void copyFiles(Args *args, MoveData *mData) {
     if (mData->totalBytes == 0) {
-        printMessage(config, "Nothing to do", false);
+        printMessage("Nothing to do", false);
         return;
     }
 
@@ -62,17 +64,17 @@ void copyFiles(const PtShConfig *config, Args *args, MoveData *mData) {
     ioctl(0, TIOCGWINSZ, &w);
 
     printf("\n\n");
-    setProgressBar(config, w.ws_col, 0);
+    setProgressBar(w.ws_col, 0);
 
     createSubdirs(args, mData);
     unsigned long actualByte = 0;
 
     for (int i = 0; i < mData->fileCount; i++)
         if (!mData->files[i]->ignore)
-            copyFile(config, mData->files[i], w.ws_col, &actualByte,
+            copyFile(mData->files[i], w.ws_col, &actualByte,
                      &mData->totalBytes);
 
-    setProgressBar(config, w.ws_col, 100);
+    setProgressBar(w.ws_col, 100);
     printf("\n");
-    printMessage(config, "Done", false);
+    printMessage("Done", false);
 }

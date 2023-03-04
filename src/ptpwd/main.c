@@ -1,4 +1,4 @@
-#include "../common/configParser.h"
+#include "../config.h"
 #include "../common/display.h"
 #include "../common/limits.h"
 #include <stdio.h>
@@ -47,38 +47,30 @@ void freeDirs(PathDirs *dirs) {
     free(dirs);
 }
 
-void displayDir(PtShConfig *config, char *name, FileConfigValues *fcv) {
-    if (getValueInt(config->pwdShowDirPrefix))
-        printf("%s%s\x1b[0m%s", fcv->prefixEscapeCodes, fcv->prefix,
-               fcv->nameEscapeCodes);
+void displayDir(char *name) {
+    if (PWD_SHOW_DIR_PREFIX)
+        printf("%s%s\x1b[0m%s", DIR_PREFIX_ESCAPE_CODES, DIR_PREFIX, DIR_NAME_ESCAPE_CODES);
 
     printf("%s\x1b[0m", name);
 
-    if (getValueInt(config->pwdNextline))
-        printf("\n");
+    if (PWD_NEXTLINE) printf("\n");
 }
 
-void display(char *path, PtShConfig *config) {
+void display(char *path) {
     PathDirs *dirs = getDirs(path);
-    FileConfigValues *fcv = getFileConfigValues(config, FT_Directory);
-
-    displayDir(config, "/", fcv);
 
     for (int i = 0; i < dirs->count; i++) {
-        if (getValueInt(config->pwdNextline)) {
-            int margin = getValueInt(config->pwdNextlineMargin);
-            for (int x = 0; x < margin * i; x++)
+        if (PWD_NEXTLINE) {
+            for (int x = 0; x < PWD_NEXTLINE_MARGIN * i; x++)
                 printf(" ");
         }
-        printf("%s%s\x1b[0m", getValueStr(config->pwdDirSeparatorEscapeCodes),
-               getValueStr(config->pwdDirSeparator));
-        displayDir(config, dirs->names[i], fcv);
+        printf("%s%s\x1b[0m", PWD_DIR_SEPARATOR_ESCAPE_CODES, PWD_DIR_SEPARATOR);
+        displayDir(dirs->names[i]);
     }
 
-    if (!getValueInt(config->pwdNextline))
+    if (PWD_NEXTLINE)
         printf("\n");
 
-    free(fcv);
     freeDirs(dirs);
 }
 
@@ -98,11 +90,8 @@ int main(int argc, char **argv) {
         pwd = tmp;
     }
 
-    PtShConfig *config = readConfig();
+    display(pwd);
 
-    display(pwd, config);
-
-    closeConfig(config);
     if (!args->logical)
         free(pwd);
     free(args);

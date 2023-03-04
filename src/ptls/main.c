@@ -50,8 +50,6 @@ int main(int argc, char **argv) {
             dirCount++;
     }
 
-    PtShConfig *config = readConfig();
-
     if (dirContent->fileCount > 1) {
         if (args->noDirsTop)
             sort(dirContent->files, args, 0, dirContent->fileCount - 1);
@@ -66,17 +64,15 @@ int main(int argc, char **argv) {
     Fields **fields = malloc(printSize * sizeof(Fields *));
 
     int x = 0;
-    for (int i = 0; i < printSize; i++) {
+    for (unsigned i = 0; i < printSize; i++) {
         while (!fileVisible(dirContent->files[x], args))
             x++;
         fields[i] = calloc(1, sizeof(Fields));
-        fillFields(fields[i], dirContent->files[x], config, args, columnSizes);
+        fillFields(fields[i], dirContent->files[x], args, columnSizes);
         x++;
     }
 
-    display(fields, printSize, args, config, columnSizes);
-
-    closeConfig(config);
+    display(fields, printSize, args, columnSizes);
 
     free(columnSizes);
     for (int i = 0; i < printSize; i++)

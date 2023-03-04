@@ -1,3 +1,4 @@
+#include "../config.h"
 #include "argDefs.h"
 #include "ptcp.h"
 #include <stdio.h>
@@ -13,7 +14,7 @@ void displayHelp() {
     printHelpLine(INTERACTIVE_ARG, INTERACTIVE_ARG_W, INTERACTIVE_ARG_DESC);
 }
 
-void setProgressBar(const PtShConfig *config, int size, int percentage) {
+void setProgressBar(int size, int percentage) {
     if (percentage > 100)
         percentage = 100;
     size -= 3;
@@ -26,13 +27,13 @@ void setProgressBar(const PtShConfig *config, int size, int percentage) {
 
     printf("\b\r");
 
-    if (config->cpProgressBarBorderEscapeCodes)
-        printf("%s", config->cpProgressBarBorderEscapeCodes);
+    if (CP_PROGRESSBAR_BORDER_ESCAPE_CODES)
+        printf("%s", CP_PROGRESSBAR_BORDER_ESCAPE_CODES);
 
     printf("[\x1b[0m");
 
-    if (config->cpProgressBarEscapeCodes)
-        printf("%s", config->cpProgressBarEscapeCodes);
+    if (CP_PROGRESSBAR_ESCAPE_CODES)
+        printf("%s", CP_PROGRESSBAR_ESCAPE_CODES);
 
     for (int x = 0; x < size; x++) {
         if (x == blocks)
@@ -44,8 +45,8 @@ void setProgressBar(const PtShConfig *config, int size, int percentage) {
             printf(" ");
     }
 
-    if (config->cpProgressBarBorderEscapeCodes)
-        printf("%s", config->cpProgressBarBorderEscapeCodes);
+    if (CP_PROGRESSBAR_BORDER_ESCAPE_CODES)
+        printf("%s", CP_PROGRESSBAR_BORDER_ESCAPE_CODES);
 
     printf("]\x1b[0m ");
 

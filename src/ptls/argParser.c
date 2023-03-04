@@ -3,7 +3,7 @@
 #include <string.h>
 
 void getCharArgs(Args *args, char *str) {
-    for (int i = 1; i < strlen(str); i++) {
+    for (unsigned i = 1; i < strlen(str); i++) {
         switch (str[i]) {
         case ALL_ARG:
             args->all = true;
@@ -85,7 +85,7 @@ Args *parseArgs(int argc, char **argv) {
     if (argc == 1)
         return args;
 
-    for (int i = 1; i < argc; i++) {
+    for (unsigned i = 1; i < argc; i++) {
         if (argv[i][0] == '-') {
             if (argv[i][1] == '-')
                 getWordArg(args, argv[i]);

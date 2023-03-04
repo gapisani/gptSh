@@ -1,8 +1,8 @@
-#include "configParser.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include "../config.h"
 
 int printSize(char *buff, int buffSize, unsigned long size, bool decimalSize) {
     int precission = 1;
@@ -39,12 +39,12 @@ int printSize(char *buff, int buffSize, unsigned long size, bool decimalSize) {
     return digits + 1 + strlen(unit);
 }
 
-void printMessage(const PtShConfig *config, const char *str, bool err) {
-    const char *pec =
-        err ? config->errorPrefixEscapeCodes : config->successPrefixEscapeCodes;
-    const char *ep = err ? config->errorPrefix : config->successPrefix;
-    const char *emec = err ? config->errorMessageEscapeCodes
-                           : config->successMessageEscapeCodes;
+void printMessage(const char *str, bool err) {
+    const char *ep   = err ? ERROR_PREFIX : SUCCESS_PREFIX;
+    const char *pec  = err ? ERROR_PREFIX_ESCAPE_CODES
+                           : SUCCESS_PREFIX_ESCAPE_CODES;
+    const char *emec = err ? ERROR_MESSAGE_ESCAPE_CODES
+                           : SUCCESS_MESSAGE_ESCAPE_CODES;
 
     if (pec)
         printf("%s", pec);

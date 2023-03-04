@@ -12,7 +12,7 @@ void removeSlash(char **val) {
         (*val)[strlen(*val) - 1] = '\0';
 }
 
-void addFile(Args *args, PtShConfig *config, MoveData *data, char *source,
+void addFile(Args *args, MoveData *data, char *source,
              char *dest) {
     if (data->files == NULL)
         data->files = calloc(1, sizeof(FilePaths *));
@@ -66,7 +66,7 @@ void addSubdir(Args *args, MoveData *data, char *source, char *dest) {
     free(sourceStats);
 }
 
-void scanSubdir(Args *args, PtShConfig *config, DIR *sourceDir, MoveData *data,
+void scanSubdir(Args *args, DIR *sourceDir, MoveData *data,
                 char *subPath, int ignoreDestSubPath) {
     struct dirent *d;
 
@@ -85,7 +85,7 @@ void scanSubdir(Args *args, PtShConfig *config, DIR *sourceDir, MoveData *data,
             strcat(newSubPath, &d->d_name[0]);
             strcat(newSubPath, "/");
 
-            scanSubdir(args, config, opendir(newSubPath), data, newSubPath,
+            scanSubdir(args, opendir(newSubPath), data, newSubPath,
                        ignoreDestSubPath + strlen(&d->d_name[0] - 1));
 
             free(newSubPath);
@@ -106,11 +106,11 @@ void scanSubdir(Args *args, PtShConfig *config, DIR *sourceDir, MoveData *data,
         strcat(dest, ptr);
         strcat(dest, &d->d_name[0]);
 
-        addFile(args, config, data, source, dest);
+        addFile(args, data, source, dest);
     }
 }
 
-MoveData *copyToDir(Args *args, PtShConfig *config) {
+MoveData *copyToDir(Args *args) {
     MoveData *data = calloc(1, sizeof(MoveData));
 
     removeSlash(&args->destPath);
@@ -138,7 +138,7 @@ MoveData *copyToDir(Args *args, PtShConfig *config) {
                 else
                     ignoreDestSubPath++;
 
-                scanSubdir(args, config, sourceDir, data, subPath,
+                scanSubdir(args, sourceDir, data, subPath,
                            ignoreDestSubPath);
 
                 free(subPath);
@@ -165,7 +165,7 @@ MoveData *copyToDir(Args *args, PtShConfig *config) {
             char *source = calloc(strlen(sourcePath) + 1, sizeof(char));
             strcpy(source, sourcePath);
 
-            addFile(args, config, data, source, dest);
+            addFile(args, data, source, dest);
         }
 
         free(stats);
@@ -174,11 +174,11 @@ MoveData *copyToDir(Args *args, PtShConfig *config) {
     return data;
 }
 
-MoveData *copyToFile(const PtShConfig *config, Args *args) {
+MoveData *copyToFile(Args *args) {
     struct stat *stats = calloc(1, sizeof(struct stat));
 
     if (stat(args->sourcePath[0], stats) != 0) {
-        printMessage(config, "Source file doesn't exist", true);
+        printMessage("Source file doesn't exist", true);
         free(stats);
         return NULL;
     }
@@ -201,7 +201,7 @@ MoveData *copyToFile(const PtShConfig *config, Args *args) {
     return data;
 }
 
-MoveData *getMoveData(Args *args, PtShConfig *config) {
+MoveData *getMoveData(Args *args) {
     DIR *dir = opendir(args->destPath);
 
     if (dir) {
@@ -210,24 +210,22 @@ MoveData *getMoveData(Args *args, PtShConfig *config) {
         DIR *srcdir = opendir(args->sourcePath[0]);
         if (srcdir && !args->recursive) {
             closedir(srcdir);
-            printMessage(config,
-                         "To copy a directory, You must use 'recursive' flag",
-                         true);
+            printMessage("To copy a directory, You must use 'recursive' flag", true);
             return NULL;
         }
 
-        return copyToDir(args, config);
+        return copyToDir(args);
     } else if (args->sourcePathCount == 1) {
         DIR *srcdir = opendir(args->sourcePath[0]);
         if (srcdir) {
             closedir(srcdir);
-            printMessage(config, "Destination directory doesn't exist", true);
+            printMessage("Destination directory doesn't exist", true);
             return NULL;
         }
-        return copyToFile(config, args);
+        return copyToFile(args);
     }
 
-    printMessage(config, "Destination directory doesn't exist", true);
+    printMessage("Destination directory doesn't exist", true);
     return NULL;
 }
 
