@@ -5,22 +5,22 @@
 #include "../common/display.h"
 #include "types.h"
 
-//argParser.c
+// argParser.c
 Args *parseArgs(int argc, char **argv);
 void freeArgs(Args *args);
 
-//fileScanner.c
+// fileScanner.c
 MoveData *getMoveData(Args *args, PtShConfig *config);
 void freeMoveData(MoveData *data);
 
-//display.c
+// display.c
 void setProgressBar(const PtShConfig *config, int size, int percentage);
 void displayHelp();
 
-//files.c
+// files.c
 void copyFiles(const PtShConfig *config, Args *args, MoveData *mData);
 
-//fileSelector.c
+// fileSelector.c
 void selectFiles(PtShConfig *config, MoveData *mData);
 
 #endif

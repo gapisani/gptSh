@@ -1,9 +1,9 @@
 #ifndef PTCP_ARG_DEFS
 #define PTCP_ARG_DEFS
 
-#define DECIMAL_SIZE_ARG          'D'
-#define DECIMAL_SIZE_ARG_W        "--decimal"
-#define DECIMAL_SIZE_ARG_DESC     "Shows size in decimal units instead of binary"
+#define DECIMAL_SIZE_ARG 'D'
+#define DECIMAL_SIZE_ARG_W "--decimal"
+#define DECIMAL_SIZE_ARG_DESC "Shows size in decimal units instead of binary"
 
 #define RECURSIVE_ARG 'r'
 #define RECURSIVE_ARG_W "--recursive"
