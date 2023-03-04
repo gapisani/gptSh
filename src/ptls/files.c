@@ -10,43 +10,56 @@ DirContent *getFiles(Args *args) {
     DirContent *content = (DirContent *)malloc(sizeof(DirContent));
     content->fileCount = 0;
 
-    d = opendir(args->dirPath);
+    struct stat dirStat;
+    stat(args->dirPath, &dirStat);
+    if(S_ISDIR(dirStat.st_mode)) {
+        d = opendir(args->dirPath);
 
-    if (d) {
-        long loc = telldir(d);
-        int filesCount = 0;
-        while (readdir(d) != NULL)
-            filesCount++;
-        seekdir(d, loc);
+        if (d) {
+            long loc = telldir(d);
+            int filesCount = 0;
+            while (readdir(d) != NULL)
+                filesCount++;
+            seekdir(d, loc);
 
-        content->files = (File **)calloc(filesCount, sizeof(File *));
+            content->files = (File **)calloc(filesCount, sizeof(File *));
 
-        int i = 0;
-        while ((dir = readdir(d)) != NULL) {
-            content->files[i] = (File *)malloc(sizeof(File));
-            content->files[i]->name = (char *)malloc(strlen(dir->d_name) + 1);
-            content->files[i]->stats =
-                (struct stat *)malloc(sizeof(struct stat));
+            int i = 0;
+            while ((dir = readdir(d)) != NULL) {
+                content->files[i] = (File *)malloc(sizeof(File));
+                content->files[i]->name = (char *)malloc(strlen(dir->d_name) + 1);
+                content->files[i]->stats = (struct stat *)malloc(sizeof(struct stat));
 
-            char buff[PATH_MAX + 1];
-            realpath(args->dirPath, buff);
+                char buff[PATH_MAX + 1];
+                realpath(args->dirPath, buff);
 
-            char *path = calloc(PATH_MAX + 1, sizeof(char));
-            strcpy(path, &(buff[0]));
-            strcat(path, "/");
-            strcat(path, dir->d_name);
+                char *path = calloc(PATH_MAX + 1, sizeof(char));
+                strcpy(path, &(buff[0]));
+                strcat(path, "/");
+                strcat(path, dir->d_name);
 
-            strcpy(content->files[i]->name, dir->d_name);
-            lstat(path, content->files[i]->stats);
+                strcpy(content->files[i]->name, dir->d_name);
+                lstat(path, content->files[i]->stats);
 
-            free(path);
-            i++;
+                free(path);
+                i++;
+            }
+
+            content->fileCount = filesCount;
+
+            closedir(d);
+            free(dir);
+        } else {
+            // TODO: Error or something?
         }
-
-        content->fileCount = filesCount;
-
-        closedir(d);
-        free(dir);
+    } else {
+        content->fileCount = 1;
+        content->files = (File **)calloc(1, sizeof(File *));
+        content->files[0] = (File *)malloc(sizeof(File));
+        content->files[0]->name = (char *)malloc(strlen(args->dirPath) + 1);
+        content->files[0]->stats = (struct stat *)malloc(sizeof(struct stat));
+        *content->files[0]->stats = dirStat;
+        strcpy(content->files[0]->name, args->dirPath);
     }
 
     return content;
