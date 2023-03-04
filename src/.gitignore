@@ -1,6 +1,0 @@
-*.out
-*.o
-*.a
-.nvimlog
-build/
-obj/
