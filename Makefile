@@ -1,5 +1,7 @@
 .PHONY: all obj clean install uninstall
 
+TARGETS=gptls gptcp gptpwd
+
 CC=cc
 LDFLAGS=-lm
 PREFIX=/usr/local
@@ -12,7 +14,6 @@ VER=$(or $(TAG),$(COMMIT))
 SRC=$(shell find src -iname "*.c")
 OBJ=$(subst src/,obj/,$(SRC:.c=.o))
 
-TARGETS=ptls ptcp ptpwd
 BIN=$(addprefix build/,$(TARGETS))
 
 obj/%.o: src/%.c

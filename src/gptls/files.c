@@ -10,9 +10,9 @@ DirContent *getFiles(Args *args) {
     DirContent *content = (DirContent *)malloc(sizeof(DirContent));
     content->fileCount = 0;
 
-    struct stat dirStat;
-    stat(args->dirPath, &dirStat);
-    if(S_ISDIR(dirStat.st_mode)) {
+    struct stat nodeStat;
+    stat(args->dirPath, &nodeStat);
+    if(S_ISDIR(nodeStat.st_mode)) {
         d = opendir(args->dirPath);
 
         if (d) {
@@ -58,7 +58,7 @@ DirContent *getFiles(Args *args) {
         content->files[0] = (File *)malloc(sizeof(File));
         content->files[0]->name = (char *)malloc(strlen(args->dirPath) + 1);
         content->files[0]->stats = (struct stat *)malloc(sizeof(struct stat));
-        *content->files[0]->stats = dirStat;
+        *content->files[0]->stats = nodeStat;
         strcpy(content->files[0]->name, args->dirPath);
     }
 
